@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block title %}Product Management - AI-SmartShop{% endblock %}
+
+{% block content %}
+<div class="min-h-screen" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);">
+    <!-- Header Section -->
+    <div class="bg-white/90 backdrop-blur-md shadow-lg border-b border-purple-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Product Management</h1>
+                    <p class="text-gray-600 mt-1">Manage your AI-SmartShop product catalog</p>
+                </div>
+                <a href="{{ url_for('add_product') }}" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-full hover:shadow-lg transition-all flex items-center space-x-2 hover:scale-105">
+                    <i class="fas fa-plus"></i>
+                    <span>Add New Product</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Product Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6 hover:shadow-xl transition-all hover:scale-105">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Products</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ products|length }}</p>
+                    </div>
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-full">
+                        <i class="fas fa-box text-white"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6 hover:shadow-xl transition-all hover:scale-105">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Active Products</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ products|selectattr('is_active')|list|length }}</p>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 p-3 rounded-full">
+                        <i class="fas fa-check-circle text-white"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6 hover:shadow-xl transition-all hover:scale-105">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Low Stock</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ products|selectattr('stock', 'lt', 10)|list|length }}</p>
+                    </div>
+                    <div class="bg-gradient-to-r from-yellow-500 to-orange-500 p-3 rounded-full">
+                        <i class="fas fa-exclamation-triangle text-white"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6 hover:shadow-xl transition-all hover:scale-105">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Out of Stock</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ products|selectattr('stock', 'eq', 0)|list|length }}</p>
+                    </div>
+                    <div class="bg-gradient-to-r from-red-500 to-red-600 p-3 rounded-full">
+                        <i class="fas fa-times-circle text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters and Search -->
+        <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 mb-8">
+            <div class="p-6">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <input type="text" id="searchInput" placeholder="Search products..." 
+                                   class="w-full pl-10 pr-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm">
+                            <i class="fas fa-search absolute left-3 top-4 text-purple-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <select id="categoryFilter" class="px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm">
+                            <option value="">All Categories</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Fashion">Fashion</option>
+                            <option value="Home">Home</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Books">Books</option>
+                            <option value="Beauty">Beauty</option>
+                        </select>
+                        <!-- <button onclick="exportProducts()" class="bg-gradient-to-r from-purple-100 to-blue-100 hover:from-purple-200 hover:to-blue-200 text-purple-700 px-4 py-3 rounded-xl transition-all border border-purple-200">
+                            <i class="fas fa-download mr-2"></i>Export
+                        </button> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Table -->
+        <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100">
+            <div class="px-6 py-4 border-b border-purple-100">
+                <h3 class="text-lg font-semibold text-gray-900">Product Catalog</h3>
+            </div>
+            <div class="overflow-x-auto">
+                {% if products %}
+                <table class="w-full">
+                    <thead class="bg-gradient-to-r from-purple-50 to-blue-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Product</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Category</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Price</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Stock</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white/50 backdrop-blur-sm divide-y divide-purple-100">
+                        {% for product in products %}
+                        <tr class="hover:bg-white/80 transition-colors" data-category="{{ product.category }}">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-12 w-12">
+                                        {% if product.image_url %}
+                                            <img class="h-12 w-12 rounded-xl object-cover border-2 border-purple-200" src="{{ product.image_url }}" alt="{{ product.name }}">
+                                        {% else %}
+                                            <div class="h-12 w-12 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center shadow-lg">
+                                                <i class="fas fa-box text-white"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
+                                        <div class="text-sm text-gray-500">ID: {{ product.product_id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 border border-purple-200">
+                                    {{ product.category }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">${{ "%.2f"|format(product.price) }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if product.stock > 20 %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                        {{ product.stock }} in stock
+                                    </span>
+                                {% elif product.stock > 0 %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                        {{ product.stock }} low stock
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                        Out of stock
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if product.is_active %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                        <i class="fas fa-check-circle mr-1"></i>Active
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                                        <i class="fas fa-times-circle mr-1"></i>Inactive
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center space-x-2">
+                                    <a href="{{ url_for('edit_product', product_id=product.product_id) }}" 
+                                       class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-all hover:scale-105 border border-blue-200">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button onclick="deleteProduct({{ product.product_id }}, '{{ product.name }}')" 
+                                            class="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-lg transition-all hover:scale-105 border border-red-200">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-16">
+                    <i class="fas fa-box-open text-purple-400 text-6xl mb-4"></i>
+                    <h3 class="text-xl font-medium text-gray-900 mb-2">No products found</h3>
+                    <p class="text-gray-500 mb-6">Get started by adding your first product to AI-SmartShop</p>
+                    <a href="{{ url_for('add_product') }}" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-full hover:shadow-lg transition-all hover:scale-105">
+                        <i class="fas fa-plus mr-2"></i>Add Product
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white/95 backdrop-blur-md rounded-2xl max-w-md w-full p-6 border border-purple-200 shadow-2xl">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-exclamation-triangle text-red-500 text-2xl mr-3"></i>
+                <h3 class="text-lg font-medium text-gray-900">Confirm Delete</h3>
+            </div>
+            <p class="text-gray-600 mb-6">Are you sure you want to delete this product? This action cannot be undone.</p>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
+                    Cancel
+                </button>
+                <button onclick="confirmDelete()" class="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transition-all">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let deleteProductId = null;
+
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', function() {
+    filterProducts();
+});
+
+// Filter functionality
+document.getElementById('categoryFilter').addEventListener('change', function() {
+    filterProducts();
+});
+
+function filterProducts() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const categoryFilter = document.getElementById('categoryFilter').value;
+    
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const productName = row.querySelector('td:first-child .text-sm.font-medium').textContent.toLowerCase();
+        const category = row.dataset.category;
+        
+        const matchesSearch = productName.includes(searchTerm);
+        const matchesCategory = !categoryFilter || category === categoryFilter;
+        
+        if (matchesSearch && matchesCategory) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function deleteProduct(productId, productName) {
+    deleteProductId = productId;
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    deleteProductId = null;
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+function confirmDelete() {
+    if (deleteProductId) {
+        fetch(`/admin/products/${deleteProductId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to delete product');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the product');
+        });
+    }
+    closeDeleteModal();
+}
+
+function exportProducts() {
+    window.location.href = '/admin/products/export';
+}
+</script>
+{% endblock %}

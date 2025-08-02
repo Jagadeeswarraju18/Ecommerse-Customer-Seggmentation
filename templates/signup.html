@@ -1,0 +1,519 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - AI-SmartShop{% endblock %}
+
+{% block content %}
+<style>
+    .signup-container {
+        min-height: calc(100vh - 4rem);
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        margin: -2rem -1rem;
+    }
+    
+    .signup-card {
+        position: relative;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        padding: 3rem;
+        width: 100%;
+        max-width: 700px;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+    
+    .signup-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .signup-logo {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    .signup-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+    
+    .signup-subtitle {
+        color: #718096;
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group-full {
+        grid-column: 1 / -1;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: rgba(255, 255, 255, 1);
+    }
+    
+    .signup-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        margin-top: 1rem;
+    }
+    
+    .signup-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+    
+    .signup-btn:active {
+        transform: translateY(0);
+    }
+    
+    .divider {
+        display: flex;
+        align-items: center;
+        margin: 2rem 0;
+    }
+    
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e2e8f0;
+    }
+    
+    .divider span {
+        padding: 0 1rem;
+        color: #718096;
+        font-size: 0.9rem;
+    }
+    
+    .login-link {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .login-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+    
+    .floating-elements {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        pointer-events: none;
+    }
+    
+    .floating-icon {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        background: rgba(102, 126, 234, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: float 6s ease-in-out infinite;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(102, 126, 234, 0.3);
+    }
+    
+    .floating-icon:nth-child(1) {
+        top: 10%;
+        left: 8%;
+        animation-delay: 0s;
+    }
+    
+    .floating-icon:nth-child(2) {
+        top: 20%;
+        right: 10%;
+        animation-delay: 2s;
+    }
+    
+    .floating-icon:nth-child(3) {
+        bottom: 25%;
+        left: 12%;
+        animation-delay: 4s;
+    }
+    
+    .floating-icon:nth-child(4) {
+        bottom: 15%;
+        right: 8%;
+        animation-delay: 1s;
+    }
+    
+    .floating-icon:nth-child(5) {
+        top: 60%;
+        left: 5%;
+        animation-delay: 3s;
+    }
+    
+    .floating-icon:nth-child(6) {
+        top: 70%;
+        right: 15%;
+        animation-delay: 5s;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    .floating-icon i {
+        color: #667eea;
+        font-size: 1.2rem;
+    }
+    
+    .alert {
+        border-radius: 12px;
+        border: none;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        border-left: 4px solid #dc2626;
+    }
+    
+    .alert-info {
+        background: rgba(59, 130, 246, 0.1);
+        color: #2563eb;
+        border-left-color: #2563eb;
+    }
+    
+    .back-to-home {
+        position: fixed;
+        top: 5rem;
+        left: 2rem;
+        z-index: 20;
+    }
+    
+    .back-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .back-btn:hover {
+        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .feature-highlight {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+    
+    .feature-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+    
+    .feature-text {
+        font-size: 0.9rem;
+        color: #4a5568;
+        text-align: center;
+        line-height: 1.5;
+    }
+    
+    @media (max-width: 768px) {
+        .signup-card {
+            padding: 2rem;
+            margin: 1rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+        
+        .back-to-home {
+            top: 5rem;
+            left: 1rem;
+        }
+        
+        .floating-icon {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .floating-icon i {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="signup-container">
+    
+   
+    
+    <!-- Back to Home Button -->
+    <div class="back-to-home">
+        <a href="{{ url_for('index') }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
+    </div>
+    
+    <div class="signup-card">
+        <div class="signup-header">
+            <div class="signup-logo">
+                <i class="fas fa-user-plus text-white" style="font-size: 2rem;"></i>
+            </div>
+            <h1 class="signup-title">Join AI-SmartShop</h1>
+            <p class="signup-subtitle">Create your account and start your AI-powered shopping journey</p>
+        </div>
+        
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>{{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="username" class="form-label">
+                        <i class="fas fa-user me-2"></i>Username
+                    </label>
+                    <input type="text" class="form-control" id="username" name="username" required placeholder="Choose a username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email" class="form-label">
+                        <i class="fas fa-envelope me-2"></i>Email
+                    </label>
+                    <input type="email" class="form-control" id="email" name="email" required placeholder="your@email.com">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password" class="form-label">
+                        <i class="fas fa-lock me-2"></i>Password
+                    </label>
+                    <input type="password" class="form-control" id="password" name="password" required placeholder="Create a password">
+                </div>
+                
+                <div class="form-group">
+                    <label for="name" class="form-label">
+                        <i class="fas fa-id-card me-2"></i>Full Name
+                    </label>
+                    <input type="text" class="form-control" id="name" name="name" required placeholder="Your full name">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="phone" class="form-label">
+                        <i class="fas fa-phone me-2"></i>Phone
+                    </label>
+                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="Your phone number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="city" class="form-label">
+                        <i class="fas fa-map-marker-alt me-2"></i>City
+                    </label>
+                    <input type="text" class="form-control" id="city" name="city" placeholder="Your city">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="gender" class="form-label">
+                        <i class="fas fa-user-circle me-2"></i>Gender
+                    </label>
+                    <select class="form-select" id="gender" name="gender">
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="marital_status" class="form-label">
+                        <i class="fas fa-ring me-2"></i>Marital Status
+                    </label>
+                    <select class="form-select" id="marital_status" name="marital_status">
+                        <option value="">Select Status</option>
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                        <option value="Divorced">Divorced</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button type="submit" class="signup-btn">
+                <i class="fas fa-rocket me-2"></i>
+                Create My Account
+            </button>
+        </form>
+        
+        <div class="divider">
+            <span>or</span>
+        </div>
+        
+        <div class="login-link">
+            <p>Already have an account? <a href="{{ url_for('login') }}">Sign in here</a></p>
+        </div>
+        
+        <!-- Feature Highlight -->
+        <div class="feature-highlight">
+            <div class="feature-title">
+                <i class="fas fa-magic me-2"></i>What you'll get with AI-SmartShop
+            </div>
+            <div class="feature-text">
+                Personalized recommendations • Smart product discovery • Exclusive AI-powered deals • Advanced analytics dashboard
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add some interactive effects
+    const signupCard = document.querySelector('.signup-card');
+    const formInputs = document.querySelectorAll('.form-control, .form-select');
+    
+    // Add focus effects
+    formInputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'translateY(-2px)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Add card entrance animation
+    signupCard.style.opacity = '0';
+    signupCard.style.transform = 'translateY(20px)';
+    
+    setTimeout(() => {
+        signupCard.style.transition = 'all 0.6s ease';
+        signupCard.style.opacity = '1';
+        signupCard.style.transform = 'translateY(0)';
+    }, 200);
+    
+    // Add form validation feedback
+    const form = document.querySelector('form');
+    const submitBtn = document.querySelector('.signup-btn');
+    
+    form.addEventListener('submit', function(e) {
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Account...';
+        submitBtn.disabled = true;
+    });
+    
+    // Real-time validation
+    const requiredFields = document.querySelectorAll('input[required]');
+    
+    function checkFormValidity() {
+        let isValid = true;
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+            }
+        });
+        
+        if (isValid) {
+            submitBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        } else {
+            submitBtn.style.background = 'linear-gradient(135deg, #a0aec0 0%, #718096 100%)';
+        }
+    }
+    
+    requiredFields.forEach(field => {
+        field.addEventListener('input', checkFormValidity);
+    });
+    
+    // Initial check
+    checkFormValidity();
+});
+</script>
+{% endblock %}

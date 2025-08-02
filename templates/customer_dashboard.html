@@ -1,0 +1,1086 @@
+{% extends "base.html" %}
+
+{% block title %}{{ customer.name }}'s Dashboard - AI-SmartShop{% endblock %}
+
+{% block content %}
+<!-- Custom Scrollbar Styles -->
+<style>
+.scrollbar-thin {
+    scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.scrollbar-track-gray-100::-webkit-scrollbar-track {
+    background-color: #f3f4f6;
+    border-radius: 6px;
+}
+
+.scrollbar-thumb-purple-300::-webkit-scrollbar-thumb {
+    background-color: #c4b5fd;
+    border-radius: 6px;
+}
+
+.hover\:scrollbar-thumb-purple-400:hover::-webkit-scrollbar-thumb {
+    background-color: #a78bfa;
+}
+
+.line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+</style>
+
+<div class="min-h-screen" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);">
+    <!-- Header Section -->
+    <div class="bg-white/90 backdrop-blur-md shadow-xl border-b border-purple-100">
+        <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                        Welcome back, {{ customer.name }}! 👋
+                    </h1>
+                    <p class="text-gray-600 mt-1">Your personalized shopping experience • Member since {{ member_since }}</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="bg-gradient-to-r from-purple-100 to-blue-100 px-4 py-2 rounded-full border border-purple-200">
+                        <span class="text-sm font-medium text-purple-700">
+                            <i class="fas fa-crown mr-1"></i>{{ loyalty_tier }}
+                        </span>
+                    </div>
+                    <button onclick="toggleCart()" class="relative p-3 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                        <i class="fas fa-shopping-cart text-lg"></i>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">0</span>
+                    </button>
+                    <a href="{{ url_for('logout') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-full transition-colors">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 mb-6">
+            <div class="flex overflow-x-auto">
+                <button onclick="switchTab('shop')" id="tab-shop" class="tab-button active flex-1 px-6 py-4 text-center font-medium transition-all border-b-2 border-purple-500 bg-purple-50 text-purple-700">
+                    <i class="fas fa-store mr-2"></i>Shop
+                </button>
+                <button onclick="switchTab('recommendations')" id="tab-recommendations" class="tab-button flex-1 px-6 py-4 text-center font-medium text-gray-600 hover:text-purple-600 transition-all border-b-2 border-transparent">
+                    <i class="fas fa-magic mr-2"></i>For You
+                </button>
+                <button onclick="switchTab('orders')" id="tab-orders" class="tab-button flex-1 px-6 py-4 text-center font-medium text-gray-600 hover:text-purple-600 transition-all border-b-2 border-transparent">
+                    <i class="fas fa-receipt mr-2"></i>Orders
+                </button>
+                <button onclick="switchTab('analytics')" id="tab-analytics" class="tab-button flex-1 px-6 py-4 text-center font-medium text-gray-600 hover:text-purple-600 transition-all border-b-2 border-transparent">
+                    <i class="fas fa-chart-line mr-2"></i>Analytics
+                </button>
+                <button onclick="switchTab('profile')" id="tab-profile" class="tab-button flex-1 px-6 py-4 text-center font-medium text-gray-600 hover:text-purple-600 transition-all border-b-2 border-transparent">
+                    <i class="fas fa-user-circle mr-2"></i>Profile
+                </button>
+            </div>
+        </div>
+
+        <!-- Shop Tab -->
+        <div id="content-shop" class="tab-content">
+            <!-- Category Cards with Real Images -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-layer-group text-purple-600 mr-3"></i>Shop by Category
+                </h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    {% set category_images = {
+                        'Electronics': 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=300&h=200&fit=crop&crop=center',
+                        'Fashion': 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=300&h=200&fit=crop&crop=center',
+                        'Home & Kitchen': 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=200&fit=crop&crop=center',
+                        'Sports': 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop&crop=center',
+                        'Books': 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=200&fit=crop&crop=center',
+                        'Beauty': 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&h=200&fit=crop&crop=center',
+                        'Toys': 'https://images.unsplash.com/photo-1558877202-f5e8c8c0d0c2?w=300&h=200&fit=crop&crop=center',
+                        'Health': 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=200&fit=crop&crop=center'
+                    } %}
+                    {% for category in categories %}
+                    <div class="category-card bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 overflow-hidden cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-300" 
+                         onclick="filterByCategory('{{ category.category }}')">
+                        <div class="h-24 overflow-hidden relative">
+                            <img src="{{ category_images.get(category.category, 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=300&h=200&fit=crop&crop=center') }}" 
+                                 alt="{{ category.category }}" 
+                                 class="w-full h-full object-cover hover:scale-110 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                            <div class="absolute bottom-2 left-2 text-white font-bold text-sm">
+                                {{ category.category }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Customer Dashboard Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+                <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6 hover:shadow-xl transition-all">
+                    <div class="flex items-center">
+                        <div class="bg-gradient-to-r from-green-400 to-green-600 p-3 rounded-full mr-4">
+                            <i class="fas fa-dollar-sign text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total Spent</p>
+                            <p class="text-2xl font-bold text-gray-900">${{ "%.2f"|format(total_spent or 0) }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6 hover:shadow-xl transition-all">
+                    <div class="flex items-center">
+                        <div class="bg-gradient-to-r from-blue-400 to-blue-600 p-3 rounded-full mr-4">
+                            <i class="fas fa-shopping-bag text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total Orders</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ total_orders or 0 }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6 hover:shadow-xl transition-all">
+                    <div class="flex items-center">
+                        <div class="bg-gradient-to-r from-purple-400 to-purple-600 p-3 rounded-full mr-4">
+                            <i class="fas fa-star text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Loyalty Points</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ ((total_spent or 0) * 10)|int }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6 hover:shadow-xl transition-all">
+                    <div class="flex items-center">
+                        <div class="bg-gradient-to-r from-yellow-400 to-yellow-600 p-3 rounded-full mr-4">
+                            <i class="fas fa-trophy text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Member Tier</p>
+                            <p class="text-lg font-bold text-gray-900">{{ loyalty_tier or 'New' }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6 hover:shadow-xl transition-all">
+                    <div class="flex items-center">
+                        <div class="bg-gradient-to-r from-indigo-400 to-indigo-600 p-3 rounded-full mr-4">
+                            <i class="fas fa-coins text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">CLV</p>
+                            <p class="text-2xl font-bold text-gray-900">${{ "%.0f"|format(clv_score or 0) }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Smart Alerts -->
+            {% if alerts %}
+            <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-6 mb-8">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-bell text-yellow-600 mr-3"></i>Smart Notifications
+                </h3>
+                <div class="space-y-3">
+                    {% for alert in alerts %}
+                    <div class="flex items-center justify-between p-3 bg-white/80 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-{{ alert.icon }} text-{{ alert.color }}-600 mr-3"></i>
+                            <span class="text-gray-800">{{ alert.message }}</span>
+                        </div>
+                        <button onclick="dismissAlert('{{ alert.id }}')" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Search and Filter -->
+            <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6 mb-8">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <input type="text" id="product-search" placeholder="Search for products..." 
+                                   class="w-full pl-12 pr-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm">
+                            <i class="fas fa-search absolute left-4 top-4 text-purple-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <select id="category-filter" class="px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                            <option value="{{ category.category }}">{{ category.category }}</option>
+                            {% endfor %}
+                        </select>
+                        <select id="price-sort" class="px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm">
+                            <option value="">Sort by Price</option>
+                            <option value="low">Low to High</option>
+                            <option value="high">High to Low</option>
+                        </select>
+                        <button onclick="clearFilters()" class="px-4 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors">
+                            <i class="fas fa-times mr-2"></i>Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Grid with Enhanced Scrolling -->
+            <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">All Products</h2>
+                    <div class="text-sm text-gray-600">
+                        <span id="products-count">{{ products|length }}</span> products found
+                    </div>
+                </div>
+                <!-- FIXED: Added proper scrolling container -->
+                <div class="max-h-[800px] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-gray-100 hover:scrollbar-thumb-purple-400">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pr-2" id="products-grid">
+                        {% for product in products %}
+                        <div class="product-card bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 overflow-hidden hover:shadow-xl hover:scale-105 transition-all duration-300" 
+                             data-category="{{ product.category }}" data-price="{{ product.price }}">
+                            <div class="relative">
+                                <div class="h-48 overflow-hidden">
+                                    {% if product.image_path %}
+                                    <!-- FIXED: Image path handling -->
+                                    <img src="{{ product.image_path if product.image_path.startswith('http') or product.image_path.startswith('/') else '/' + product.image_path }}" 
+                                         alt="{{ product.name }}" 
+                                         class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400&h=300&fit=crop'; this.classList.add('opacity-75');">
+                                    {% else %}
+                                    <div class="w-full h-full bg-gradient-to-r from-purple-400 to-blue-400 flex items-center justify-center">
+                                        <i class="fas fa-box text-white text-4xl"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% if product.stock == 0 %}
+                                <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                    <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">Out of Stock</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-bold text-gray-800 mb-2 line-clamp-2">{{ product.name }}</h3>
+                                <p class="text-sm text-purple-600 mb-2 font-medium">{{ product.category }}</p>
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                                        ${{ "%.2f"|format(product.price) }}
+                                    </span>
+                                    {% if product.stock > 0 %}
+                                    <span class="text-sm text-green-600 font-medium">
+                                        <i class="fas fa-check-circle mr-1"></i>Stock: {{ product.stock }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Quantity Controls -->
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center bg-gray-100 rounded-full">
+                                        <button onclick="decreaseQuantity({{ product.product_id }})" class="p-2 hover:bg-gray-200 rounded-full transition-colors">
+                                            <i class="fas fa-minus text-sm"></i>
+                                        </button>
+                                        <span id="qty-{{ product.product_id }}" class="px-4 py-2 font-medium">1</span>
+                                        <button onclick="increaseQuantity({{ product.product_id }})" class="p-2 hover:bg-gray-200 rounded-full transition-colors">
+                                            <i class="fas fa-plus text-sm"></i>
+                                        </button>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button onclick="addToCart({{ product.product_id }})" 
+                                                class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-full hover:shadow-lg transition-all hover:scale-105"
+                                                {% if product.stock == 0 %}disabled{% endif %}>
+                                            <i class="fas fa-cart-plus mr-1"></i>Add
+                                        </button>
+                                        <button onclick="buyNow({{ product.product_id }})" 
+                                                class="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-full hover:shadow-lg transition-all hover:scale-105"
+                                                {% if product.stock == 0 %}disabled{% endif %}>
+                                            <i class="fas fa-bolt mr-1"></i>Buy
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations Tab -->
+        <div id="content-recommendations" class="tab-content hidden">
+            <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-magic text-purple-600 mr-3"></i>Recommended Just For You
+                    </h2>
+                    <button onclick="loadRecommendations()" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-full hover:shadow-lg transition-all">
+                        <i class="fas fa-sync-alt mr-2"></i>Refresh
+                    </button>
+                </div>
+                <div id="recommendations-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Recommendations will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Tab -->
+        <div id="content-orders" class="tab-content hidden">
+            <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100">
+                <div class="p-6 border-b border-purple-100">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                            <i class="fas fa-receipt text-purple-600 mr-3"></i>Order History
+                        </h2>
+                        <button onclick="downloadReport('orders')" class="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-full hover:shadow-lg transition-all">
+                            <i class="fas fa-download mr-2"></i>Download Report
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    {% if orders %}
+                    <div class="max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-gray-100">
+                        <div class="space-y-4 pr-2">
+                            {% for order in orders %}
+                            <div class="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-200 hover:shadow-md transition-all">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center mr-4">
+                                        <i class="fas fa-shopping-bag text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-gray-800">Order #{{ order.order_id }}</h4>
+                                        <p class="text-sm text-gray-600">{{ order.product_name or 'Product N/A' }}</p>
+                                        <p class="text-xs text-purple-600">{{ order.order_date[:10] if order.order_date else 'N/A' }}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-lg font-bold text-gray-800">${{ "%.2f"|format(order.order_value) }}</p>
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check-circle mr-1"></i>{{ (order.status or 'completed')|title }}
+                                    </span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-12">
+                        <i class="fas fa-shopping-cart text-gray-400 text-6xl mb-4"></i>
+                        <h3 class="text-xl font-medium text-gray-900 mb-2">No orders yet</h3>
+                        <p class="text-gray-500 mb-6">Start shopping to see your order history here!</p>
+                        <button onclick="switchTab('shop')" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-full hover:shadow-lg transition-all">
+                            Start Shopping
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="content-analytics" class="tab-content hidden">
+            <div class="space-y-6">
+                <!-- Personal Shopping Insights -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-user-chart text-purple-600 mr-3"></i>Personal Shopping Insights
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                                <span class="text-sm font-medium text-gray-700">Customer Lifetime Value</span>
+                                <span class="text-lg font-bold text-blue-600">${{ "%.2f"|format(clv_score or 0) }}</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                                <span class="text-sm font-medium text-gray-700">Average Order Value</span>
+                                <span class="text-lg font-bold text-green-600">${{ "%.2f"|format(avg_order_value or 0) }}</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                                <span class="text-sm font-medium text-gray-700">Shopping Frequency</span>
+                                <span class="text-lg font-bold text-purple-600">{{ usage_data.shopping_frequency if usage_data else 'Regular' }}</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                                <span class="text-sm font-medium text-gray-700">Favorite Category</span>
+                                <span class="text-lg font-bold text-yellow-600">{{ favorite_category or 'N/A' }}</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-indigo-50 rounded-lg">
+                                <span class="text-sm font-medium text-gray-700">Days Since Last Order</span>
+                                <span class="text-lg font-bold text-indigo-600">{{ days_since_last_order or 0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-chart-line text-purple-600 mr-3"></i>Monthly Spending Trend
+                        </h3>
+                        <div class="h-64">
+                            <canvas id="spendingChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Analysis -->
+                {% if usage_data and usage_data.category_stats %}
+                <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-chart-pie text-purple-600 mr-3"></i>Category Spending Analysis
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for category in usage_data.category_stats[:6] %}
+                        <div class="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg">
+                            <h4 class="font-semibold text-gray-800">{{ category.category or 'Unknown' }}</h4>
+                            <p class="text-sm text-gray-600">{{ category.order_count }} orders</p>
+                            <p class="text-lg font-bold text-purple-600">${{ "%.2f"|format(category.total_spent) }}</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                                <div class="bg-purple-600 h-2 rounded-full" style="width: {{ (category.total_spent / (total_spent or 1) * 100)|round }}%"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Download Reports Section -->
+                <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-download text-purple-600 mr-3"></i>Download Your Reports
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button onclick="downloadReport('orders')" class="p-6 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-center">
+                            <i class="fas fa-file-csv text-blue-600 text-3xl mb-3"></i>
+                            <p class="font-medium text-gray-800">Order History</p>
+                            <p class="text-sm text-gray-600">Complete order records (CSV)</p>
+                        </button>
+                        <button onclick="downloadReport('analytics')" class="p-6 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-center">
+                            <i class="fas fa-chart-bar text-green-600 text-3xl mb-3"></i>
+                            <p class="font-medium text-gray-800">Analytics Report</p>
+                            <p class="text-sm text-gray-600">Detailed insights (CSV)</p>
+                        </button>
+                        <button onclick="downloadReport('recommendations')" class="p-6 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors text-center">
+                            <i class="fas fa-star text-purple-600 text-3xl mb-3"></i>
+                            <p class="font-medium text-gray-800">Recommendations</p>
+                            <p class="text-sm text-gray-600">Personalized list (CSV)</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="content-profile" class="tab-content hidden">
+            <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-user-circle text-purple-600 mr-3"></i>Profile Settings
+                </h2>
+                <form id="profile-form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                            <input type="text" name="name" value="{{ customer.name }}" class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                            <input type="email" name="email" value="{{ customer.email }}" class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                            <input type="tel" name="phone" value="{{ customer.phone or '' }}" class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                            <input type="text" name="city" value="{{ customer.city or '' }}" class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                            <select name="gender" class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="">Select Gender</option>
+                                <option value="male" {{ 'selected' if customer.gender == 'male' else '' }}>Male</option>
+                                <option value="female" {{ 'selected' if customer.gender == 'female' else '' }}>Female</option>
+                                <option value="other" {{ 'selected' if customer.gender == 'other' else '' }}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Marital Status</label>
+                            <select name="marital_status" class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="">Select Status</option>
+                                <option value="single" {{ 'selected' if customer.marital_status == 'single' else '' }}>Single</option>
+                                <option value="married" {{ 'selected' if customer.marital_status == 'married' else '' }}>Married</option>
+                                <option value="divorced" {{ 'selected' if customer.marital_status == 'divorced' else '' }}>Divorced</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-full hover:shadow-lg transition-all hover:scale-105">
+                            <i class="fas fa-save mr-2"></i>Update Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shopping Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed inset-y-0 right-0 w-96 bg-white/95 backdrop-blur-md shadow-2xl transform translate-x-full transition-transform duration-300 z-50 border-l border-purple-200">
+        <div class="p-6 border-b border-purple-100">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Shopping Cart</h2>
+                <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+        </div>
+        <div class="p-6 h-[calc(100%-200px)] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-gray-100">
+            <div id="cart-items">
+                <!-- Cart items will be populated here -->
+            </div>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-purple-100 bg-white/95 backdrop-blur-md">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-lg font-semibold text-gray-800">Total:</span>
+                <span id="cart-total" class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">$0.00</span>
+            </div>
+            <button onclick="checkout()" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-full hover:shadow-lg transition-all hover:scale-105 font-semibold">
+                <i class="fas fa-credit-card mr-2"></i>Proceed to Checkout
+            </button>
+        </div>
+    </div>
+
+    <!-- Cart Overlay -->
+    <div id="cart-overlay" class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden z-40" onclick="toggleCart()"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Global state
+let cart = [];
+let cartTotal = 0;
+let productQuantities = {};
+
+// Initialize quantities for all products
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.product-card').forEach(card => {
+        const addButton = card.querySelector('[onclick*="addToCart"]');
+        if (addButton) {
+            const productId = addButton.getAttribute('onclick').match(/\d+/)[0];
+            productQuantities[productId] = 1;
+        }
+    });
+    updateCart();
+    loadRecommendations();
+});
+
+// Tab switching
+function switchTab(tabName) {
+    // Hide all contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    // Remove active from all tabs
+    document.querySelectorAll('.tab-button').forEach(tab => {
+        tab.classList.remove('active', 'border-purple-500', 'bg-purple-50', 'text-purple-700');
+        tab.classList.add('border-transparent', 'text-gray-600');
+    });
+    
+    // Show selected content
+    document.getElementById(`content-${tabName}`).classList.remove('hidden');
+    
+    // Activate selected tab
+    const activeTab = document.getElementById(`tab-${tabName}`);
+    activeTab.classList.add('active', 'border-purple-500', 'bg-purple-50', 'text-purple-700');
+    activeTab.classList.remove('border-transparent', 'text-gray-600');
+    
+    // Load content based on tab
+    if (tabName === 'analytics') {
+        renderSpendingChart();
+    }
+}
+
+// Quantity controls
+function increaseQuantity(productId) {
+    productQuantities[productId] = (productQuantities[productId] || 1) + 1;
+    document.getElementById(`qty-${productId}`).textContent = productQuantities[productId];
+}
+
+function decreaseQuantity(productId) {
+    if (productQuantities[productId] > 1) {
+        productQuantities[productId]--;
+        document.getElementById(`qty-${productId}`).textContent = productQuantities[productId];
+    }
+}
+
+// Cart functionality
+function addToCart(productId) {
+    const quantity = productQuantities[productId] || 1;
+    
+    fetch('/api/add-to-cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            product_id: productId,
+            quantity: quantity
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateCart();
+            showNotification(data.message, 'success');
+            // Reset quantity to 1
+            productQuantities[productId] = 1;
+            document.getElementById(`qty-${productId}`).textContent = 1;
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Network error occurred', 'error');
+    });
+}
+
+function buyNow(productId) {
+    addToCart(productId);
+    setTimeout(() => {
+        toggleCart();
+    }, 1000);
+}
+
+function updateCart() {
+    fetch('/api/cart')
+    .then(response => response.json())
+    .then(data => {
+        cart = data.items || [];
+        cartTotal = data.total || 0;
+        
+        // Update cart count
+        document.getElementById('cart-count').textContent = cart.length;
+        
+        // Update cart items
+        const cartItems = document.getElementById('cart-items');
+        cartItems.innerHTML = '';
+        
+        if (cart.length === 0) {
+            cartItems.innerHTML = `
+                <div class="text-center py-8">
+                    <i class="fas fa-shopping-cart text-gray-400 text-4xl mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
+                    <p class="text-gray-500">Add some amazing products!</p>
+                </div>
+            `;
+        } else {
+            cart.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'flex items-center justify-between p-4 border-b border-purple-100 last:border-b-0 hover:bg-purple-50 transition-colors';
+                itemDiv.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-blue-400 rounded-lg flex items-center justify-center flex-shrink-0">
+                            ${item.image_path ? 
+                                `<img src="${item.image_path}" alt="${item.name}" class="w-full h-full object-cover rounded-lg">` :
+                                `<i class="fas fa-box text-white"></i>`
+                            }
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-medium text-gray-800 truncate">${item.name}</h4>
+                            <p class="text-sm text-gray-600">Qty: ${item.quantity || 1}</p>
+                            <p class="text-sm font-medium text-purple-600">$${(item.price * (item.quantity || 1)).toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <button onclick="removeFromCart(${item.product_id})" class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                cartItems.appendChild(itemDiv);
+            });
+        }
+        
+        // Update total
+        document.getElementById('cart-total').textContent = `$${cartTotal.toFixed(2)}`;
+    })
+    .catch(error => {
+        console.error('Error updating cart:', error);
+    });
+}
+
+function removeFromCart(productId) {
+    fetch('/api/remove-from-cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({product_id: productId})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateCart();
+            showNotification(data.message, 'info');
+        }
+    });
+}
+
+function toggleCart() {
+    const sidebar = document.getElementById('cart-sidebar');
+    const overlay = document.getElementById('cart-overlay');
+    
+    sidebar.classList.toggle('translate-x-full');
+    overlay.classList.toggle('hidden');
+}
+
+function checkout() {
+    if (cart.length === 0) {
+        showNotification('Your cart is empty!', 'warning');
+        return;
+    }
+    
+    fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            cart = [];
+            updateCart();
+            toggleCart();
+            // Refresh if on orders tab
+            if (!document.getElementById('content-orders').classList.contains('hidden')) {
+                setTimeout(() => location.reload(), 1500);
+            }
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Network error during checkout', 'error');
+    });
+}
+
+// Product filtering
+document.getElementById('product-search')?.addEventListener('input', filterProducts);
+document.getElementById('category-filter')?.addEventListener('change', filterProducts);
+document.getElementById('price-sort')?.addEventListener('change', filterProducts);
+
+function filterProducts() {
+    const searchTerm = document.getElementById('product-search')?.value.toLowerCase() || '';
+    const categoryFilter = document.getElementById('category-filter')?.value || '';
+    const priceSort = document.getElementById('price-sort')?.value || '';
+    
+    const products = document.querySelectorAll('.product-card');
+    let filteredProducts = Array.from(products);
+    
+    // Filter products
+    filteredProducts = filteredProducts.filter(product => {
+        const name = product.querySelector('h3').textContent.toLowerCase();
+        const category = product.dataset.category;
+        
+        const matchesSearch = name.includes(searchTerm);
+        const matchesCategory = !categoryFilter || category === categoryFilter;
+        
+        return matchesSearch && matchesCategory;
+    });
+    
+    // Hide all products first
+    products.forEach(product => product.style.display = 'none');
+    
+    // Show filtered products
+    filteredProducts.forEach(product => product.style.display = 'block');
+    
+    // Update products count
+    document.getElementById('products-count').textContent = filteredProducts.length;
+    
+    // Sort by price
+    if (priceSort) {
+        filteredProducts.sort((a, b) => {
+            const priceA = parseFloat(a.dataset.price);
+            const priceB = parseFloat(b.dataset.price);
+            return priceSort === 'low' ? priceA - priceB : priceB - priceA;
+        });
+        
+        const container = document.getElementById('products-grid');
+        filteredProducts.forEach(product => container.appendChild(product));
+    }
+}
+
+function filterByCategory(category) {
+    document.getElementById('category-filter').value = category;
+    filterProducts();
+    // Scroll to products
+    document.getElementById('products-grid').scrollIntoView({ behavior: 'smooth' });
+}
+
+function clearFilters() {
+    document.getElementById('product-search').value = '';
+    document.getElementById('category-filter').value = '';
+    document.getElementById('price-sort').value = '';
+    filterProducts();
+}
+
+// Load recommendations
+function loadRecommendations() {
+    const grid = document.getElementById('recommendations-grid');
+    grid.innerHTML = `
+        <div class="col-span-full text-center py-8">
+            <i class="fas fa-spinner fa-spin text-purple-500 text-3xl mb-4"></i>
+            <p class="text-gray-600">Loading your personalized recommendations...</p>
+        </div>
+    `;
+    
+    fetch('/api/recommendations')
+    .then(response => response.json())
+    .then(data => {
+        grid.innerHTML = '';
+        
+        if (data.recommendations && data.recommendations.length > 0) {
+            data.recommendations.forEach(product => {
+                const productDiv = document.createElement('div');
+                productDiv.className = 'bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 overflow-hidden hover:shadow-xl hover:scale-105 transition-all duration-300';
+                productDiv.innerHTML = `
+                    <div class="h-48 overflow-hidden">
+                        ${product.image_path ? 
+                            `<img src="${product.image_path.startsWith('http') || product.image_path.startsWith('/') ? product.image_path : '/' + product.image_path}" 
+                                  alt="${product.name}" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                                  onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400&h=300&fit=crop'; this.classList.add('opacity-75');">` :
+                            `<div class="w-full h-full bg-gradient-to-r from-purple-400 to-blue-400 flex items-center justify-center">
+                                <i class="fas fa-box text-white text-4xl"></i>
+                            </div>`
+                        }
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-gray-800 mb-2">${product.name}</h3>
+                        <p class="text-sm text-purple-600 mb-2 font-medium">${product.category}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                                $${product.price.toFixed(2)}
+                            </span>
+                            <button onclick="addToCartFromRecommendations(${product.product_id})" 
+                                    class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-full hover:shadow-lg transition-all hover:scale-105">
+                                <i class="fas fa-cart-plus mr-1"></i>Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(productDiv);
+            });
+        } else {
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <i class="fas fa-magic text-gray-400 text-6xl mb-4"></i>
+                    <h3 class="text-xl font-medium text-gray-900 mb-2">No recommendations yet</h3>
+                    <p class="text-gray-500 mb-6">Make some purchases to get personalized recommendations!</p>
+                    <button onclick="switchTab('shop')" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-full hover:shadow-lg transition-all">
+                        Start Shopping
+                    </button>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error loading recommendations:', error);
+        grid.innerHTML = `
+            <div class="col-span-full text-center py-8">
+                <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-4"></i>
+                <p class="text-gray-600">Error loading recommendations</p>
+            </div>
+        `;
+    });
+}
+
+function addToCartFromRecommendations(productId) {
+    fetch('/api/add-to-cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            product_id: productId,
+            quantity: 1
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateCart();
+            showNotification('Added to cart from recommendations!', 'success');
+        } else {
+            showNotification(data.message, 'error');
+        }
+    });
+}
+
+// Analytics chart
+function renderSpendingChart() {
+    const ctx = document.getElementById('spendingChart');
+    if (!ctx) return;
+    
+    fetch('/api/usage-data')
+    .then(response => response.json())
+    .then(data => {
+        const monthlyData = data.monthly_spending || [];
+        
+        const chartData = {
+            labels: monthlyData.map(item => item.month).reverse(),
+            datasets: [{
+                label: 'Monthly Spending',
+                data: monthlyData.map(item => item.total_spent).reverse(),
+                backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                borderColor: 'rgba(139, 92, 246, 1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            }]
+        };
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(139, 92, 246, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error loading chart data:', error);
+    });
+}
+
+// Download reports
+function downloadReport(type) {
+    showNotification(`Preparing ${type} report...`, 'info');
+    
+    // Create a temporary link and trigger download
+    const link = document.createElement('a');
+    link.href = `/api/download-report/${type}`;
+    link.download = `${type}_report.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setTimeout(() => {
+        showNotification(`${type} report downloaded successfully!`, 'success');
+    }, 1000);
+}
+
+// Dismiss alerts
+function dismissAlert(alertId) {
+    fetch('/api/dismiss-alert', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({alert_id: alertId})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove alert from DOM
+            document.querySelector(`[onclick="dismissAlert('${alertId}')"]`).closest('.flex').remove();
+        }
+    });
+}
+
+// Profile form submission
+document.getElementById('profile-form')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const profileData = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        city: formData.get('city'),
+        gender: formData.get('gender'),
+        marital_status: formData.get('marital_status')
+    };
+    
+    fetch('/api/customer/update-profile', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Network error occurred', 'error');
+    });
+});
+
+// Notification system
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-sm ${
+        type === 'success' ? 'bg-green-500' : 
+        type === 'error' ? 'bg-red-500' : 
+        type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+    } text-white transform translate-x-full transition-transform duration-300`;
+    
+    notification.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas fa-${
+                type === 'success' ? 'check-circle' : 
+                type === 'error' ? 'exclamation-triangle' : 
+                type === 'warning' ? 'exclamation-circle' : 'info-circle'
+            } mr-3"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Slide in
+    setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Slide out and remove
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => notification.remove(), 300);
+    }, 4000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Reset Password - AI-SmartShop{% endblock %}
+
+{% block content %}
+<style>
+    .reset-container {
+        min-height: calc(100vh - 4rem);
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        margin: -2rem -1rem;
+    }
+
+    .reset-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        padding: 3rem;
+        width: 100%;
+        max-width: 450px;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .reset-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .reset-logo {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .reset-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #2d3748;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: rgba(255, 255, 255, 1);
+    }
+
+    .reset-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .reset-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    .alert {
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        border-left: 4px solid #dc2626;
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        border-left-color: #059669;
+    }
+
+    @media (max-width: 768px) {
+        .reset-card {
+            padding: 2rem;
+            margin: 1rem;
+        }
+    }
+</style>
+
+<div class="reset-container">
+    <div class="reset-card">
+        <div class="reset-header">
+            <div class="reset-logo">
+                <i class="fas fa-key text-white" style="font-size: 2rem;"></i>
+            </div>
+            <h1 class="reset-title">Reset Password</h1>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-success">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="password" class="form-label">
+                    <i class="fas fa-lock me-2"></i>New Password
+                </label>
+                <input type="password" class="form-control" name="password" id="password" required placeholder="Enter new password">
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password" class="form-label">
+                    <i class="fas fa-lock me-2"></i>Confirm Password
+                </label>
+                <input type="password" class="form-control" name="confirm_password" id="confirm_password" required placeholder="Confirm new password">
+            </div>
+
+            <button type="submit" class="reset-btn">
+                <i class="fas fa-check-circle me-2"></i>Reset Password
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

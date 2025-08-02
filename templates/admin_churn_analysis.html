@@ -1,0 +1,82 @@
+<!-- templates/admin_churn_analysis.html -->
+{% extends "base.html" %}
+
+{% block title %}Churn Analysis{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">Churn Analysis</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-exclamation-triangle"></i> Customer Churn Risk Assessment</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Customer ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Segment</th>
+                                <th>Churn Risk</th>
+                                <th>Recency</th>
+                                <th>Frequency</th>
+                                <th>Monetary</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for customer in churn_analysis %}
+                            <tr>
+                                <td>{{ customer.customer_id }}</td>
+                                <td>{{ customer.name }}</td>
+                                <td>{{ customer.email }}</td>
+                                <td>
+                                    {% if customer.segment %}
+                                        <span class="badge bg-info">{{ customer.segment }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Unassigned</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if customer.churn_probability %}
+                                        <span class="badge bg-{% if customer.churn_probability > 0.7 %}danger{% elif customer.churn_probability > 0.4 %}warning{% else %}success{% endif %}">
+                                            {{ "%.1f"|format(customer.churn_probability * 100) }}%
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ customer.rfm_recency or 'N/A' }}</td>
+                                <td>{{ customer.rfm_frequency or 'N/A' }}</td>
+                                <td>${{ "%.2f"|format(customer.rfm_monetary or 0) }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="sendRetentionEmail({{ customer.customer_id }})">
+                                        <i class="fas fa-envelope"></i> Contact
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function sendRetentionEmail(customerId) {
+    alert(`Retention email feature for customer ${customerId} to be implemented`);
+}
+</script>
+{% endblock %}

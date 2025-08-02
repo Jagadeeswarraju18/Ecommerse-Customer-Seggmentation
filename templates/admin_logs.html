@@ -1,0 +1,119 @@
+<!-- templates/admin_logs.html -->
+{% extends "base.html" %}
+
+{% block title %}System Logs{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">System Logs & Analytics</h2>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-lg-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5><i class="fas fa-users"></i> Top Active Users (Last 7 Days)</h5>
+                {% if active_users %}
+                    {% for user in active_users[:5] %}
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>{{ user.name }}</span>
+                        <span>{{ user.activity_count }} activities</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No activity data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h5><i class="fas fa-clock"></i> Last Seen</h5>
+                {% if active_users %}
+                    {% for user in active_users[:5] %}
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>{{ user.name }}</span>
+                        <span>{{ user.last_seen[:10] if user.last_seen else 'Never' }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h5><i class="fas fa-exclamation-triangle"></i> Recent Alerts</h5>
+                {% if recent_alerts %}
+                    {% for alert in recent_alerts[:5] %}
+                    <div class="mb-2">
+                        <strong>{{ alert.customer_name }}</strong><br>
+                        <small>{{ alert.message[:50] }}...</small>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No recent alerts</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Logs -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-list"></i> Activity Logs</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Customer</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                                <th>IP Address</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs %}
+                            <tr>
+                                <td>{{ log.timestamp[:16] }}</td>
+                                <td>{{ log.customer_name }}</td>
+                                <td>
+                                    <span class="badge bg-{% if log.action == 'login' %}success{% elif log.action == 'logout' %}info{% elif log.action == 'purchase' %}primary{% else %}secondary{% endif %}">
+                                        {{ log.action }}
+                                    </span>
+                                </td>
+                                <td>{{ log.details or '-' }}</td>
+                                <td>{{ log.ip_address or '-' }}</td>
+                                <td>
+                                    {% if log.session_duration %}
+                                        {{ (log.session_duration // 60) }}m {{ (log.session_duration % 60) }}s
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-SmartShop - Intelligent E-commerce Platform with Customer Analytics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .hero-overlay {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+        }
+        
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-8px);
+        }
+        
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-animation:nth-child(2) {
+            animation-delay: 2s;
+        }
+        
+        .floating-animation:nth-child(3) {
+            animation-delay: 4s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stats-counter {
+            font-weight: 800;
+            font-size: 2.5rem;
+        }
+        
+        .demo-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .bg-pattern {
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(120, 198, 121, 0.3) 0%, transparent 50%);
+        }
+        
+        .shopping-bg {
+            background-image: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=800&fit=crop&crop=center');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        
+        .shopping-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-shopping-cart text-white text-lg"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800">AI-SmartShop</span>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-600 hover:text-purple-600 transition-colors">Features</a>
+                    <a href="#stats" class="text-gray-600 hover:text-purple-600 transition-colors">Stats</a>
+                    <a href="#demo" class="text-gray-600 hover:text-purple-600 transition-colors">Demo</a>
+                    <a href="/login" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-full hover:shadow-lg transition-all">Sign In</a>
+                </div>
+                
+                <div class="md:hidden">
+                    <button class="text-gray-600 hover:text-purple-600">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="min-h-screen flex items-center justify-center bg-white overflow-hidden">
+    <div class="flex flex-col md:flex-row w-full max-w-7xl mx-auto">
+
+        <!-- Left Image with Blur -->
+        <div class="relative md:w-1/2 h-96 md:h-auto overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=800&fit=crop&crop=center"
+                 alt="Shopping"
+                 class="w-full h-full object-cover filter brightness-90">
+            <div class="absolute inset-0 bg-gradient-to-r from-purple-600/30 to-blue-600/30"></div>
+        </div>
+
+        <!-- Right Content -->
+        <div class="md:w-1/2 flex flex-col justify-center items-center text-center p-8 md:p-16 
+                    bg-gradient-to-br from-purple-100 via-white to-purple-50 
+                    bg-opacity-80 backdrop-blur-lg rounded-l-3xl md:rounded-none shadow-xl relative z-10">
+
+            <h1 class="text-4xl md:text-6xl font-bold text-gray-800 mb-6 leading-tight">
+                AI-SmartShop
+                <span class="block bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent">
+                    Intelligent Shopping
+                </span>
+            </h1>
+
+            <p class="text-lg md:text-2xl text-gray-700 mb-8 leading-relaxed">
+                Experience the future of online shopping with AI-powered recommendations, smart analytics, and personalized customer experiences.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/login" class="bg-gradient-to-r from-yellow-400 to-pink-500 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl transition-all pulse-animation">
+                    <i class="fas fa-rocket mr-2"></i>
+                    Start Shopping
+                </a>
+                <a href="/signup" class="glass-effect text-gray-800 px-8 py-4 rounded-full text-lg font-semibold hover:bg-white/20 transition-all">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Join AI-SmartShop
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+                    Smart Features for 
+                    <span class="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                        Modern Shopping
+                    </span>
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Discover intelligent shopping features powered by AI that transform your e-commerce experience
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- AI-Powered Recommendations -->
+                <div class="feature-card bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-8 border border-purple-100">
+                    <div class="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-magic text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">AI Recommendations</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Get personalized product suggestions based on your shopping history, preferences, and AI-powered analysis
+                    </p>
+                </div>
+                
+                <!-- Smart Analytics -->
+                <div class="feature-card bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-8 border border-pink-100">
+                    <div class="w-16 h-16 bg-gradient-to-r from-pink-600 to-rose-600 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Smart Analytics</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Track your shopping patterns, spending insights, and get smart alerts to optimize your purchases
+                    </p>
+                </div>
+                
+                <!-- Personalized Dashboard -->
+                <div class="feature-card bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-8 border border-yellow-100">
+                    <div class="w-16 h-16 bg-gradient-to-r from-yellow-600 to-orange-600 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-tachometer-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Personal Dashboard</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Your personalized shopping hub with order history, wish lists, and customized product collections
+                    </p>
+                </div>
+                
+                <!-- Customer Insights -->
+                <div class="feature-card bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border border-green-100">
+                    <div class="w-16 h-16 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-user-chart text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Customer Insights</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Understand your shopping behavior with detailed analytics and loyalty tier tracking
+                    </p>
+                </div>
+                
+                <!-- Smart Notifications -->
+                <div class="feature-card bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-8 border border-indigo-100">
+                    <div class="w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-bell text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Smart Notifications</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Receive intelligent alerts about deals, restocks, price drops, and personalized offers
+                    </p>
+                </div>
+                
+                <!-- Multi-Role Platform -->
+                <div class="feature-card bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-8 border border-teal-100">
+                    <div class="w-16 h-16 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-users-cog text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Admin Dashboard</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Comprehensive admin tools for managing products, customers, orders, and business analytics
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section id="stats" class="py-20 bg-gradient-to-r from-purple-600 to-blue-600">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                    Trusted by Smart Shoppers
+                </h2>
+                <p class="text-xl text-white/90 max-w-3xl mx-auto">
+                    Join thousands of customers who have transformed their shopping experience with AI-SmartShop
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="text-center">
+                    <div class="stats-counter text-white mb-2">95%</div>
+                    <div class="text-white/90 text-lg">Customer Satisfaction</div>
+                </div>
+                <div class="text-center">
+                    <div class="stats-counter text-white mb-2">50%</div>
+                    <div class="text-white/90 text-lg">More Relevant Purchases</div>
+                </div>
+                <div class="text-center">
+                    <div class="stats-counter text-white mb-2">10K+</div>
+                    <div class="text-white/90 text-lg">Happy Customers</div>
+                </div>
+                <div class="text-center">
+                    <div class="stats-counter text-white mb-2">24/7</div>
+                    <div class="text-white/90 text-lg">AI-Powered Support</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section id="demo" class="py-20 bg-pattern">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+                Ready to Experience 
+                <span class="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                    Smart Shopping?
+                </span>
+            </h2>
+            <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                Join AI-SmartShop today and discover a personalized shopping experience powered by artificial intelligence
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/login" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl transition-all">
+                    <i class="fas fa-shopping-cart mr-2"></i>
+                    Start Shopping Now
+                </a>
+                <a href="/signup" class="bg-white text-purple-600 px-8 py-4 rounded-full text-lg font-semibold border-2 border-purple-600 hover:bg-purple-50 transition-all">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Create Free Account
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-shopping-cart text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold">AI-SmartShop</span>
+                    </div>
+                    <p class="text-gray-400">
+                        Revolutionizing online shopping with AI-powered personalization and intelligent customer insights.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Shop</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
+                        <li><a href="#stats" class="hover:text-white transition-colors">Why Choose Us</a></li>
+                        <li><a href="#demo" class="hover:text-white transition-colors">Demo</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Account</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/login" class="hover:text-white transition-colors">Customer Login</a></li>
+                        <li><a href="/signup" class="hover:text-white transition-colors">Create Account</a></li>
+                        <li><a href="/login" class="hover:text-white transition-colors">Admin Dashboard</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Connect</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 AI-SmartShop. All rights reserved. | Intelligent Shopping Experience</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-white/95');
+                navbar.classList.remove('bg-white/90');
+            } else {
+                navbar.classList.add('bg-white/90');
+                navbar.classList.remove('bg-white/95');
+            }
+        });
+
+        // Animate stats on scroll
+        function animateStats() {
+            const statNumbers = document.querySelectorAll('.stats-counter');
+            statNumbers.forEach(stat => {
+                if (!stat.classList.contains('animated')) {
+                    stat.classList.add('animated');
+                    const target = stat.textContent;
+                    const isPercentage = target.includes('%');
+                    const isNumber = target.includes('K') || target.includes('+');
+                    
+                    if (isPercentage) {
+                        animateNumber(stat, 0, parseInt(target), '%');
+                    } else if (target.includes('K')) {
+                        animateNumber(stat, 0, parseInt(target), 'K+');
+                    } else if (target.includes('/')) {
+                        // Keep as is for "24/7"
+                        return;
+                    }
+                }
+            });
+        }
+
+        function animateNumber(element, start, end, suffix) {
+            const duration = 2000;
+            const startTime = performance.now();
+            
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const current = Math.floor(start + (end - start) * progress);
+                element.textContent = current + suffix;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+
+        // Intersection Observer for stats animation
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateStats();
+                }
+            });
+        }, { threshold: 0.5 });
+
+        const statsSection = document.querySelector('#stats');
+        if (statsSection) {
+            observer.observe(statsSection);
+        }
+
+        // Mobile menu toggle
+        const mobileMenuButton = document.querySelector('.md\\:hidden button');
+        const mobileMenu = document.querySelector('.md\\:flex');
+        
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', function() {
+                // Add mobile menu functionality here
+                console.log('Mobile menu clicked');
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-SmartShop Analytics Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .gradient-purple {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .gradient-blue {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .gradient-green {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        .gradient-orange {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .sidebar {
+            width: 280px;
+            transition: width 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .small-chart {
+            height: 200px;
+        }
+        .activity-item {
+            border-left: 3px solid #667eea;
+            padding-left: 12px;
+            margin-bottom: 8px;
+        }
+        .alert-high { border-left-color: #ef4444; }
+        .alert-medium { border-left-color: #f59e0b; }
+        .alert-low { border-left-color: #10b981; }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .bg-gradient-pattern {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-online { background-color: #10b981; }
+        .status-warning { background-color: #f59e0b; }
+        .status-error { background-color: #ef4444; }
+    </style>
+</head>
+<body class="bg-gradient-pattern min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg relative z-10">
+        <div class="flex items-center justify-between px-6 py-4">
+            <div class="flex items-center space-x-4">
+                <button id="sidebarToggle" class="text-white hover:text-gray-200 transition-colors">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-chart-line text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">AI-SmartShop Analytics</h1>
+                        <p class="text-purple-100 text-sm">Advanced Customer Intelligence Dashboard</p>
+                    </div>
+                </div>
+                <span class="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm backdrop-blur-sm">Admin Portal</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <button class="text-white hover:text-gray-200 relative transition-colors">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span id="notificationBadge" class="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">3</span>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-3 bg-white bg-opacity-10 rounded-full px-4 py-2 backdrop-blur-sm">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=667eea&color=fff" alt="Admin" class="w-8 h-8 rounded-full">
+                    <div class="hidden md:block">
+                        <div class="text-sm font-medium">{{ session.username or 'Admin' }}</div>
+                        <div class="text-xs text-purple-100">Administrator</div>
+                    </div>
+                </div>
+                <a href="{{ url_for('logout') }}" class="text-white hover:text-gray-200 transition-colors p-2 rounded-lg hover:bg-white hover:bg-opacity-10">
+                    <i class="fas fa-sign-out-alt text-lg"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar bg-white shadow-xl h-screen sticky top-0 z-20 border-r border-purple-100">
+            <nav class="p-4">
+                <div class="mb-6">
+                    <div class="flex items-center space-x-3 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl">
+                        <div class="status-indicator status-online"></div>
+                        <div>
+                            <div class="text-sm font-semibold text-gray-800">System Status</div>
+                            <div class="text-xs text-gray-500">All systems operational</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <ul class="space-y-2">
+                    <li>
+                        <button class="nav-btn active w-full text-left px-4 py-3 rounded-xl hover:bg-gray-50 transition-all flex items-center space-x-3" data-section="overview">
+                            <i class="fas fa-tachometer-alt text-lg"></i>
+                            <span class="nav-text font-medium">Overview</span>
+                        </button>
+                    </li>
+                    <li>
+                        <!-- <button class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-gray-50 transition-all flex items-center space-x-3 text-gray-700" data-section="analytics">
+                            <i class="fas fa-chart-line text-lg"></i>
+                            <span class="nav-text font-medium">Advanced Analytics</span>
+                        </button> -->
+                    </li>
+                    <li>
+                        <button class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-gray-50 transition-all flex items-center space-x-3 text-gray-700" data-section="segmentation">
+                            <i class="fas fa-users text-lg"></i>
+                            <span class="nav-text font-medium">Customer Segments</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-gray-50 transition-all flex items-center space-x-3 text-gray-700" data-section="churn">
+                            <i class="fas fa-exclamation-triangle text-lg"></i>
+                            <span class="nav-text font-medium">Churn Analysis</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-gray-50 transition-all flex items-center space-x-3 text-gray-700" data-section="activity">
+                            <i class="fas fa-clock text-lg"></i>
+                            <span class="nav-text font-medium">Activity Logs</span>
+                        </button>
+                    </li>
+                    
+                    <li class="pt-4 border-t border-gray-200">
+                        <div class="text-xs text-gray-500 mb-2 px-3">MANAGEMENT</div>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin_customers') }}" class="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-50 transition-all flex items-center space-x-3 text-gray-600">
+                            <i class="fas fa-users-cog text-lg"></i>
+                            <span class="nav-text font-medium">Manage Customers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin_products') }}" class="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-50 transition-all flex items-center space-x-3 text-gray-600">
+                            <i class="fas fa-box text-lg"></i>
+                            <span class="nav-text font-medium">Manage Products</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin_orders') }}" class="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-50 transition-all flex items-center space-x-3 text-gray-600">
+                            <i class="fas fa-shopping-cart text-lg"></i>
+                            <span class="nav-text font-medium">Manage Orders</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 overflow-auto">
+            <!-- Overview Section -->
+             <button onclick="downloadAnalyticsReport()" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all flex items-center space-x-2">
+                        <i class="fas fa-download"></i>
+                        <span>Export Report</span>
+                    </button>
+            <div id="overview-section" class="section active">
+                <!-- Key Metrics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="gradient-blue text-white rounded-2xl p-6 card-hover shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-blue-100 text-sm font-medium">Total Customers</p>
+                                <p class="text-3xl font-bold">{{ total_customers }}</p>
+                                <p class="text-blue-100 text-sm mt-1 flex items-center">
+                                    <i class="fas fa-arrow-up mr-1"></i>+12% from last month
+                                </p>
+                            </div>
+                            <div class="bg-white bg-opacity-20 p-4 rounded-2xl">
+                                <i class="fas fa-users text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="gradient-green text-white rounded-2xl p-6 card-hover shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-green-100 text-sm font-medium">Total Revenue</p>
+                                <p class="text-3xl font-bold">${{ "%.2f"|format(total_revenue) }}</p>
+                                <p class="text-green-100 text-sm mt-1 flex items-center">
+                                    <i class="fas fa-arrow-up mr-1"></i>+8% from last month
+                                </p>
+                            </div>
+                            <div class="bg-white bg-opacity-20 p-4 rounded-2xl">
+                                <i class="fas fa-dollar-sign text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="gradient-purple text-white rounded-2xl p-6 card-hover shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-purple-100 text-sm font-medium">Total Orders</p>
+                                <p class="text-3xl font-bold">{{ total_orders }}</p>
+                                <p class="text-purple-100 text-sm mt-1 flex items-center">
+                                    <i class="fas fa-arrow-down mr-1"></i>-2% from last month
+                                </p>
+                            </div>
+                            <div class="bg-white bg-opacity-20 p-4 rounded-2xl">
+                                <i class="fas fa-shopping-cart text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="gradient-orange text-white rounded-2xl p-6 card-hover shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-yellow-100 text-sm font-medium">Active Products</p>
+                                <p class="text-3xl font-bold">{{ total_products }}</p>
+                                <p class="text-yellow-100 text-sm mt-1 flex items-center">
+                                    <i class="fas fa-arrow-up mr-1"></i>+5% from last month
+                                </p>
+                            </div>
+                            <div class="bg-white bg-opacity-20 p-4 rounded-2xl">
+                                <i class="fas fa-box text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Active Users & System Status -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="lg:col-span-2 bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-chart-line text-purple-600 mr-3"></i>
+                                Revenue Trend
+                            </h3>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 text-xs bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full">7D</button>
+                                <button class="px-3 py-1 text-xs bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200">30D</button>
+                                <button class="px-3 py-1 text-xs bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200">90D</button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-users text-green-600 mr-2"></i>
+                            Top Active Users
+                        </h3>
+                        <div id="topActiveUsersList" class="space-y-3">
+                            <!-- Will be populated by JavaScript -->
+                            <div class="flex items-center space-x-3 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl">
+                                <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-400 rounded-full flex items-center justify-center text-white font-bold">1</div>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-gray-800">Loading...</div>
+                                    <div class="text-sm text-gray-500">Active users</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100 card-hover">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-bold text-gray-800">Average CLV</h4>
+                            <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                        </div>
+                        <div class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent" id="avgCLV">$0</div>
+                        <p class="text-sm text-gray-500 mt-2">Customer Lifetime Value</p>
+                        <div class="mt-4 bg-gray-200 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full" style="width: 75%"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100 card-hover">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-bold text-gray-800">Churn Rate</h4>
+                            <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                        </div>
+                        <div class="text-3xl font-bold text-red-600" id="churnRate">0%</div>
+                        <p class="text-sm text-gray-500 mt-2">At-risk customers</p>
+                        <div class="mt-4 bg-gray-200 rounded-full h-2">
+                            <div class="bg-red-500 h-2 rounded-full" style="width: 25%"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100 card-hover">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-bold text-gray-800">Avg Order Value</h4>
+                            <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                        </div>
+                        <div class="text-3xl font-bold text-green-600" id="avgOrderValue">$0</div>
+                        <p class="text-sm text-gray-500 mt-2">Per transaction</p>
+                        <div class="mt-4 bg-gray-200 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: 65%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Orders Table -->
+                <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg overflow-hidden border border-purple-100">
+                    <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-shopping-cart text-purple-600 mr-3"></i>
+                                Recent Orders
+                            </h3>
+                            <a href="{{ url_for('admin_orders') }}" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:shadow-lg transition-all">View All</a>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for order in recent_orders %}
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="text-sm font-medium text-gray-900">#{{ order.order_id }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name={{ order.customer_name }}&background=667eea&color=fff" alt="">
+                                            <div class="ml-3">
+                                                <span class="text-sm font-medium text-gray-900">{{ order.customer_name }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ order.product_name or 'N/A' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">${{ "%.2f"|format(order.order_value) }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Completed</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.order_date[:10] if order.order_date else 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Analytics Section -->
+            <div id="analytics-section" class="section hidden">
+                <div class="mb-6 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800">Advanced Analytics</h2>
+                        <p class="text-gray-600 mt-1">Comprehensive business intelligence and insights</p>
+                    </div>
+                    <button onclick="downloadAnalyticsReport()" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all flex items-center space-x-2">
+                        <i class="fas fa-download"></i>
+                        <span>Export Report</span>
+                    </button>
+                </div>
+
+                <!-- Analytics Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+                    <!-- Revenue Analytics -->
+                    <div class="lg:col-span-2 bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100">
+                        <h3 class="text-lg font-semibold mb-4">Revenue Analytics</h3>
+                        <div class="chart-container">
+                            <canvas id="revenueAnalyticsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Key Metrics -->
+                    <div class="space-y-6">
+                        <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100">
+                            <h4 class="text-lg font-semibold mb-4">Key Performance Indicators</h4>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Monthly Recurring Revenue</span>
+                                    <span class="font-semibold text-purple-600" id="mrr">$0</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Customer Acquisition Cost</span>
+                                    <span class="font-semibold text-green-600" id="cac">$0</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Return on Investment</span>
+                                    <span class="font-semibold text-orange-600" id="roi">0%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100">
+                            <h4 class="text-lg font-semibold mb-4">Top Categories</h4>
+                            <div class="space-y-3" id="topCategories">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100">
+                        <h3 class="text-lg font-semibold mb-4">Sales by Category</h3>
+                        <div class="chart-container small-chart">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100">
+                        <h3 class="text-lg font-semibold mb-4">Customer Behavior</h3>
+                        <div class="chart-container small-chart">
+                            <canvas id="behaviorChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Segmentation Section -->
+            <div id="segmentation-section" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Customer Segmentation</h2>
+                    <p class="text-gray-600 mt-2">RFM Analysis and Advanced Clustering</p>
+                </div>
+
+                <div id="segmentationContent">
+                    <!-- Content will be loaded dynamically -->
+                    <div class="flex items-center justify-center h-64 bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100">
+                        <div class="text-center">
+                            <i class="fas fa-spinner fa-spin text-4xl text-purple-600 mb-4"></i>
+                            <p class="text-gray-600">Loading segmentation data...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Churn Analysis Section -->
+            <div id="churn-section" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Churn Analysis</h2>
+                    <p class="text-gray-600 mt-2">AI-Powered Customer Retention Insights</p>
+                </div>
+
+                <div id="churnContent">
+                    <!-- Content will be loaded dynamically -->
+                    <div class="flex items-center justify-center h-64 bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100">
+                        <div class="text-center">
+                            <i class="fas fa-spinner fa-spin text-4xl text-red-600 mb-4"></i>
+                            <p class="text-gray-600">Loading churn analysis...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Logs Section
+             <!-- Activity Logs Section -->
+            <div id="activity-section" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Activity Logs & Monitoring</h2>
+                    <p class="text-gray-600 mt-2">Real-time customer activity and system monitoring</p>
+                </div>
+
+                <!-- Activity Overview Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fas fa-clock text-blue-600 mr-2"></i>
+                            Recent Activity
+                        </h3>
+                        <div id="recentActivityList" class="space-y-3">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                
+
+                    <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fas fa-bell text-red-600 mr-2"></i>
+                            System Alerts
+                        </h3>
+                        <div id="systemAlertsList" class="space-y-3">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Activity Table -->
+                <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg overflow-hidden border border-purple-100">
+                    <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
+                        <h3 class="text-lg font-semibold text-gray-800">Detailed Activity Logs</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="activityTableBody">
+                                <!-- Will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Global variables
+        let currentSection = 'overview';
+        let charts = {};
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSidebar();
+            initializeNavigation();
+            loadOverviewData();
+        });
+
+        // Sidebar functionality
+        function initializeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.getElementById('sidebarToggle');
+            
+            toggle.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+                document.querySelectorAll('.nav-text').forEach(text => {
+                    text.style.display = sidebar.classList.contains('collapsed') ? 'none' : 'block';
+                });
+            });
+        }
+
+        // Navigation functionality
+        function initializeNavigation() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const section = btn.getAttribute('data-section');
+                    switchSection(section);
+                });
+            });
+        }
+
+        function switchSection(section) {
+            // Update active nav button
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-gray-700');
+            });
+            document.querySelector(`[data-section="${section}"]`).classList.add('active');
+            document.querySelector(`[data-section="${section}"]`).classList.remove('text-gray-700');
+
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(sec => {
+                sec.classList.add('hidden');
+            });
+
+            // Show selected section
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+            currentSection = section;
+
+            // Load section-specific data
+            switch(section) {
+                case 'overview':
+                    loadOverviewData();
+                    break;
+                case 'analytics':
+                    loadAnalyticsData();
+                    break;
+                case 'segmentation':
+                    loadSegmentationData();
+                    break;
+                case 'churn':
+                    loadChurnData();
+                    break;
+                case 'activity':
+                    loadActivityData();
+                    break;
+            }
+        }
+
+        // Load overview data and charts
+        function loadOverviewData() {
+            fetch('/api/admin/analytics')
+                .then(response => response.json())
+                .then(data => {
+                    updateKPICards(data);
+                    createOverviewCharts(data);
+                })
+                .catch(error => {
+                    console.error('Error loading overview data:', error);
+                    // Show fallback data
+                    updateKPICards({
+                        avg_clv: 0,
+                        churn_rate: 0,
+                        avg_order_value: 0,
+                        revenue_trend: { labels: [], data: [] },
+                        customer_growth: { labels: [], data: [] }
+                    });
+                });
+            
+            // Load top active users
+            loadTopActiveUsers();
+        }
+
+        function loadTopActiveUsers() {
+            fetch('/api/admin/activity-logs')
+                .then(response => response.json())
+                .then(data => {
+                    updateTopActiveUsers(data.top_active_users || []);
+                })
+                .catch(error => {
+                    console.error('Error loading active users:', error);
+                    document.getElementById('topActiveUsersList').innerHTML = '<div class="text-gray-500 text-sm">Unable to load active users</div>';
+                });
+        }
+
+        function updateTopActiveUsers(users) {
+            const container = document.getElementById('topActiveUsersList');
+            if (users.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-sm">No active users found</div>';
+                return;
+            }
+
+            container.innerHTML = users.slice(0, 5).map((user, index) => `
+                <div class="flex items-center space-x-3 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl hover:shadow-md transition-all">
+                    <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                        ${index + 1}
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-semibold text-gray-800 text-sm">${user.name || 'Unknown'}</div>
+                        <div class="text-xs text-gray-500">${user.recent_orders || 0} orders • $${(user.recent_spending || 0).toFixed(2)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateKPICards(data) {
+            document.getElementById('avgCLV').textContent = '$' + (data.avg_clv || 0).toFixed(2);
+            document.getElementById('churnRate').textContent = (data.churn_rate || 0).toFixed(1) + '%';
+            document.getElementById('avgOrderValue').textContent = '$' + (data.avg_order_value || 0).toFixed(2);
+        }
+
+        function createOverviewCharts(data) {
+            // Revenue Trend Chart
+            const revenueCtx = document.getElementById('revenueChart');
+            if (revenueCtx && data.revenue_trend) {
+                if (charts.revenue) charts.revenue.destroy();
+                charts.revenue = new Chart(revenueCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.revenue_trend.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Revenue',
+                            data: data.revenue_trend.data || [1000, 1200, 800, 1500, 2000, 1800],
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#667eea',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(0,0,0,0.1)' },
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value.toLocaleString();
+                                    }
+                                }
+                            },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Load other sections (keeping the existing functions but with better error handling)
+        function loadSegmentationData() {
+            const content = document.getElementById('segmentationContent');
+            
+            fetch('/api/admin/segmentation')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Segmentation data:', data); // Debug log
+                    if (data.segments && data.segments.length > 0) {
+                        content.innerHTML = createSegmentationHTML(data);
+                        createSegmentationChart(data);
+                    } else {
+                        content.innerHTML = `
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-8 text-center">
+                                <i class="fas fa-info-circle text-yellow-600 text-4xl mb-4"></i>
+                                <h3 class="text-lg font-semibold text-yellow-800 mb-2">Insufficient Data for Segmentation</h3>
+                                <p class="text-yellow-700">You need customers with purchase history to perform segmentation analysis.</p>
+                                <p class="text-yellow-600 mt-2">Current customers: ${data.total_customers || 0}</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading segmentation data:', error);
+                    content.innerHTML = `
+                        <div class="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
+                            <i class="fas fa-exclamation-triangle text-red-600 text-4xl mb-4"></i>
+                            <h3 class="text-lg font-semibold text-red-800 mb-2">Error Loading Segmentation Data</h3>
+                            <p class="text-red-700">Please try again later. Error: ${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+
+        function loadChurnData() {
+            const content = document.getElementById('churnContent');
+            
+            fetch('/api/admin/churn-analysis')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Churn data:', data); // Debug log
+                    if (data.high_risk_customers && data.high_risk_customers.length > 0) {
+                        content.innerHTML = createChurnHTML(data);
+                        createChurnChart(data);
+                    } else {
+                        content.innerHTML = `
+                            <div class="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
+                                <i class="fas fa-check-circle text-green-600 text-4xl mb-4"></i>
+                                <h3 class="text-lg font-semibold text-green-800 mb-2">Great News!</h3>
+                                <p class="text-green-700">No high-risk customers detected or insufficient data for analysis.</p>
+                                <p class="text-green-600 mt-2">Keep monitoring as your customer base grows.</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading churn data:', error);
+                    content.innerHTML = `
+                        <div class="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
+                            <i class="fas fa-exclamation-triangle text-red-600 text-4xl mb-4"></i>
+                            <h3 class="text-lg font-semibold text-red-800 mb-2">Error Loading Churn Analysis</h3>
+                            <p class="text-red-700">Please try again later. Error: ${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+
+        function loadActivityData() {
+            fetch('/api/admin/activity-logs')
+                .then(response => response.json())
+                .then(data => {
+                    updateActivityLists(data);
+                    updateActivityTable(data.activity_logs || []);
+                })
+                .catch(error => {
+                    console.error('Error loading activity data:', error);
+                    // Show error message in activity section
+                    document.getElementById('recentActivityList').innerHTML = '<div class="text-red-500 text-sm">Error loading activity data</div>';
+                });
+        }
+
+        // Utility functions for creating HTML content
+        function createSegmentationHTML(data) {
+            return `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100">
+                        <h3 class="text-lg font-semibold mb-4">Customer Segments Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="segmentationChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100">
+                        <h3 class="text-lg font-semibold mb-4">Segment Performance</h3>
+                        <div class="space-y-4">
+                            ${data.segments.map(segment => `
+                                <div class="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">${segment.name}</h4>
+                                        <p class="text-sm text-gray-600">${segment.count} customers</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-lg font-bold text-purple-600">$${segment.avg_clv.toFixed(2)}</div>
+                                        <div class="text-sm text-gray-500">Avg CLV</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createChurnHTML(data) {
+            return `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100">
+                        <h3 class="text-lg font-semibold mb-4">Churn Risk Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="churnChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-purple-100">
+                        <h3 class="text-lg font-semibold mb-4">High Risk Customers</h3>
+                        <div class="space-y-3 max-h-72 overflow-y-auto">
+                            ${data.high_risk_customers.slice(0, 10).map(customer => `
+                                <div class="flex items-center justify-between p-3 bg-red-50 rounded-xl border-l-4 border-red-500">
+                                    <div>
+                                        <div class="font-medium text-gray-900">${customer.name}</div>
+                                        <div class="text-sm text-gray-500">${customer.email}</div>
+                                        ${customer.churn_probability ? 
+                                            `<div class="text-xs text-red-600">Risk: ${(customer.churn_probability * 100).toFixed(1)}%</div>` : 
+                                            ''
+                                        }
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-sm font-medium text-red-600">
+                                            ${customer.days_since_last_order ? 
+                                                Math.floor(customer.days_since_last_order) + ' days' : 
+                                                'Never ordered'
+                                            }
+                                        </div>
+                                        <div class="text-xs text-gray-500">${customer.total_orders || 0} orders</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Chart creation functions
+        function createSegmentationChart(data) {
+            const ctx = document.getElementById('segmentationChart');
+            if (ctx) {
+                if (charts.segmentation) charts.segmentation.destroy();
+                charts.segmentation = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.chart_data.labels,
+                        datasets: [{
+                            data: data.chart_data.data,
+                            backgroundColor: ['#667eea', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                            borderWidth: 3,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { padding: 20 }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function createChurnChart(data) {
+            const ctx = document.getElementById('churnChart');
+            if (ctx) {
+                if (charts.churn) charts.churn.destroy();
+                charts.churn = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.churn_distribution.labels,
+                        datasets: [{
+                            data: data.churn_distribution.data,
+                            backgroundColor: data.churn_distribution.colors,
+                            borderWidth: 3,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { padding: 20 }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Activity functions
+        function updateActivityLists(data) {
+            // Recent Activity
+            const recentList = document.getElementById('recentActivityList');
+            if (data.recent_activity && data.recent_activity.length > 0) {
+                recentList.innerHTML = data.recent_activity.slice(0, 8).map(activity => `
+                    <div class="activity-item">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-medium">${activity.customer_name}</div>
+                                <div class="text-xs text-gray-500">${activity.action_type}</div>
+                            </div>
+                            <div class="text-xs text-gray-400">${formatTime(activity.order_date)}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                recentList.innerHTML = '<div class="text-gray-500 text-sm">No recent activity</div>';
+            }
+
+            // System Alerts
+            const alertsList = document.getElementById('systemAlertsList');
+            if (data.recent_alerts && data.recent_alerts.length > 0) {
+                alertsList.innerHTML = data.recent_alerts.slice(0, 6).map(alert => `
+                    <div class="activity-item alert-${alert.severity || 'low'}">
+                        <div class="text-sm font-medium">${alert.type}</div>
+                        <div class="text-xs text-gray-600">${alert.message}</div>
+                    </div>
+                `).join('');
+            } else {
+                alertsList.innerHTML = '<div class="text-gray-500 text-sm">No alerts</div>';
+            }
+        }
+
+        function updateActivityTable(logs) {
+            const tbody = document.getElementById('activityTableBody');
+            if (logs.length > 0) {
+                tbody.innerHTML = logs.slice(0, 20).map(log => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDateTime(log.timestamp)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${log.customer}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full ${getActionBadgeClass(log.action)}">
+                                ${log.action}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900">${log.details}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">192.168.1.${Math.floor(Math.random() * 255)}</td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No activity logs found</td></tr>';
+            }
+        }
+
+        // Utility functions
+        function formatTime(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+
+        function getActionBadgeClass(action) {
+            const classes = {
+                'Order Placed': 'bg-green-100 text-green-800',
+                'New Registration': 'bg-blue-100 text-blue-800',
+                'Login': 'bg-gray-100 text-gray-800',
+                'Product View': 'bg-purple-100 text-purple-800',
+                'Cart Updated': 'bg-yellow-100 text-yellow-800'
+            };
+            return classes[action] || 'bg-gray-100 text-gray-800';
+        }
+
+        // Download functionality
+        function downloadAnalyticsReport() {
+            window.location.href = '/api/admin/download-analytics-report';
+        }
+
+        // Load analytics and other section functions (keeping existing ones)
+        function loadAnalyticsData() {
+            // Implementation similar to above with error handling
+        }
+
+        // Auto-refresh data every 5 minutes
+        setInterval(() => {
+            if (currentSection === 'overview') {
+                loadOverviewData();
+            }
+        }, 300000);
+    </script>
+</body>
+</html>

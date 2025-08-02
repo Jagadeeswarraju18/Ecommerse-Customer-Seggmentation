@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Add Product - AI-SmartShop{% endblock %}
+
+{% block content %}
+<div class="min-h-screen" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);">
+    <!-- Header Section -->
+    <div class="bg-white/90 backdrop-blur-md shadow-lg border-b border-purple-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Add New Product</h1>
+                    <p class="text-gray-600 mt-1">Create a new product for your AI-SmartShop catalog</p>
+                </div>
+                <a href="{{ url_for('admin_products') }}" class="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-3 rounded-full hover:shadow-lg transition-all flex items-center space-x-2 hover:scale-105">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Products</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-8">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Product Information</h2>
+                <p class="text-gray-600">Fill in the details below to add your product to the catalog</p>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                <!-- Product Image Upload -->
+                <div class="col-span-full">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+                    <div class="mt-2 flex justify-center rounded-2xl border-2 border-dashed border-purple-300 px-6 py-10 hover:border-purple-400 transition-colors">
+                        <div class="text-center">
+                            <div id="imagePreview" class="hidden mb-4">
+                                <img id="previewImg" class="mx-auto h-32 w-32 rounded-2xl object-cover shadow-lg" src="" alt="Preview">
+                            </div>
+                            <div id="uploadPlaceholder">
+                                <i class="fas fa-cloud-upload-alt text-purple-400 text-4xl mb-4"></i>
+                                <div class="flex text-sm leading-6 text-gray-600 justify-center">
+                                    <label for="image" class="relative cursor-pointer rounded-md bg-white font-semibold text-purple-600 hover:text-purple-500">
+                                        <span>Upload a file</span>
+                                        <input id="image" name="image" type="file" accept="image/*" class="sr-only" onchange="previewImage(this)">
+                                    </label>
+                                    <p class="pl-1">or drag and drop</p>
+                                </div>
+                                <p class="text-xs leading-5 text-gray-600">PNG, JPG, GIF up to 10MB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Details Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-tag mr-2 text-purple-500"></i>Product Name *
+                        </label>
+                        <input type="text" id="name" name="name" required 
+                               class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm transition-all"
+                               placeholder="Enter product name">
+                    </div>
+
+                    <div>
+                        <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-layer-group mr-2 text-purple-500"></i>Category *
+                        </label>
+                        <select id="category" name="category" required 
+                                class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm transition-all">
+                            <option value="">Select Category</option>
+                            <option value="Electronics">📱 Electronics</option>
+                            <option value="Fashion">👗 Fashion</option>
+                            <option value="Home & Kitchen">🏠 Home & Kitchen</option>
+                            <option value="Sports">⚽ Sports</option>
+                            <option value="Books">📚 Books</option>
+                            <option value="Beauty">💄 Beauty</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="price" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-dollar-sign mr-2 text-purple-500"></i>Price ($) *
+                        </label>
+                        <input type="number" step="0.01" id="price" name="price" required 
+                               class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm transition-all"
+                               placeholder="0.00">
+                    </div>
+
+                    <div>
+                        <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-boxes mr-2 text-purple-500"></i>Stock Quantity *
+                        </label>
+                        <input type="number" id="stock" name="stock" required 
+                               class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm transition-all"
+                               placeholder="0">
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-align-left mr-2 text-purple-500"></i>Description
+                    </label>
+                    <textarea id="description" name="description" rows="4" 
+                              class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm transition-all resize-none"
+                              placeholder="Enter product description..."></textarea>
+                </div>
+
+                <!-- Image URL (Alternative) -->
+                <div>
+                    <label for="image_url" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-link mr-2 text-purple-500"></i>Image URL (Alternative)
+                    </label>
+                    <input type="url" id="image_url" name="image_url" 
+                           class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm transition-all"
+                           placeholder="https://example.com/image.jpg">
+                    <p class="text-xs text-gray-500 mt-1">You can either upload an image or provide a URL</p>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end space-x-4 pt-6">
+                    <button type="button" onclick="resetForm()" class="px-6 py-3 bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300 transition-colors">
+                        <i class="fas fa-undo mr-2"></i>Reset
+                    </button>
+                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full hover:shadow-lg transition-all hover:scale-105">
+                        <i class="fas fa-plus mr-2"></i>Add Product
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Product Preview Card -->
+        <div class="mt-8 bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-eye mr-2 text-purple-500"></i>Product Preview
+            </h3>
+            <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-6 border border-purple-200">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-gradient-to-r from-purple-400 to-blue-400 rounded-2xl flex items-center justify-center">
+                        <i class="fas fa-box text-white text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-lg font-medium text-gray-900" id="previewName">Product Name</div>
+                        <div class="text-sm text-gray-500" id="previewCategory">Category</div>
+                        <div class="text-lg font-bold text-purple-600" id="previewPrice">$0.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Real-time preview updates
+document.getElementById('name').addEventListener('input', function() {
+    document.getElementById('previewName').textContent = this.value || 'Product Name';
+});
+
+document.getElementById('category').addEventListener('change', function() {
+    document.getElementById('previewCategory').textContent = this.value || 'Category';
+});
+
+document.getElementById('price').addEventListener('input', function() {
+    const price = this.value ? parseFloat(this.value).toFixed(2) : '0.00';
+    document.getElementById('previewPrice').textContent = '$' + price;
+});
+
+// Image preview functionality
+function previewImage(input) {
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('imagePreview').classList.remove('hidden');
+            document.getElementById('uploadPlaceholder').classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Drag and drop functionality
+const uploadArea = document.querySelector('.border-dashed');
+uploadArea.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('border-purple-500', 'bg-purple-50');
+});
+
+uploadArea.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.classList.remove('border-purple-500', 'bg-purple-50');
+});
+
+uploadArea.addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('border-purple-500', 'bg-purple-50');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        document.getElementById('image').files = files;
+        previewImage(document.getElementById('image'));
+    }
+});
+
+// Reset form function
+function resetForm() {
+    document.querySelector('form').reset();
+    document.getElementById('imagePreview').classList.add('hidden');
+    document.getElementById('uploadPlaceholder').classList.remove('hidden');
+    document.getElementById('previewName').textContent = 'Product Name';
+    document.getElementById('previewCategory').textContent = 'Category';
+    document.getElementById('previewPrice').textContent = '$0.00';
+}
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const name = document.getElementById('name').value;
+    const category = document.getElementById('category').value;
+    const price = document.getElementById('price').value;
+    const stock = document.getElementById('stock').value;
+    
+    if (!name || !category || !price || !stock) {
+        e.preventDefault();
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    if (price <= 0) {
+        e.preventDefault();
+        alert('Price must be greater than 0');
+        return;
+    }
+    
+    if (stock < 0) {
+        e.preventDefault();
+        alert('Stock cannot be negative');
+        return;
+    }
+});
+</script>
+{% endblock %}

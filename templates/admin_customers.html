@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Management - AI-SmartShop{% endblock %}
+
+{% block content %}
+<div class="min-h-screen" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);">
+    <!-- Header Section -->
+    <div class="bg-white/90 backdrop-blur-md shadow-lg border-b border-purple-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Customer Management</h1>
+                    <p class="text-gray-600 mt-1">Manage your AI-SmartShop customers</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- <button onclick="exportCustomers()" class="bg-gradient-to-r from-purple-100 to-blue-100 hover:from-purple-200 hover:to-blue-200 text-purple-700 px-4 py-3 rounded-xl transition-all border border-purple-200">
+                        <i class="fas fa-download mr-2"></i>Export
+                    </button> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Customer Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Customers</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ customers|length }}</p>
+                    </div>
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-full">
+                        <i class="fas fa-users text-white"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Active Users</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ customers|length }}</p>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 p-3 rounded-full">
+                        <i class="fas fa-user-check text-white"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">New This Month</p>
+                        <p class="text-2xl font-bold text-gray-900">0</p>
+                    </div>
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-3 rounded-full">
+                        <i class="fas fa-user-plus text-white"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Premium Users</p>
+                        <p class="text-2xl font-bold text-gray-900">0</p>
+                    </div>
+                    <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 p-3 rounded-full">
+                        <i class="fas fa-crown text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100 mb-8">
+            <div class="p-6">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <input type="text" id="searchInput" placeholder="Search customers..." 
+                                   class="w-full pl-10 pr-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm">
+                            <i class="fas fa-search absolute left-3 top-4 text-purple-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <select id="cityFilter" class="px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm">
+                            <option value="">All Cities</option>
+                            {% for customer in customers %}
+                                {% if customer.city %}
+                                    <option value="{{ customer.city }}">{{ customer.city }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customers Table -->
+        <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-purple-100">
+            <div class="px-6 py-4 border-b border-purple-100">
+                <h3 class="text-lg font-semibold text-gray-900">Customer Directory</h3>
+            </div>
+            <div class="overflow-x-auto">
+                {% if customers %}
+                <table class="w-full">
+                    <thead class="bg-gradient-to-r from-purple-50 to-blue-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Customer</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Contact</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Location</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Joined</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Last Login</th>
+                            <!-- <th class="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Actions</th> -->
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white/50 backdrop-blur-sm divide-y divide-purple-100">
+                        {% for customer in customers %}
+                        <tr class="hover:bg-white/80 transition-colors" data-city="{{ customer.city }}">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <div class="h-10 w-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                                            <span class="text-white font-semibold">{{ customer.name[:1].upper() }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ customer.name }}</div>
+                                        <div class="text-sm text-gray-500">@{{ customer.username }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ customer.email }}</div>
+                                <div class="text-sm text-gray-500">{{ customer.phone or 'N/A' }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ customer.city or 'N/A' }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ customer.created_at[:10] if customer.created_at else 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ customer.last_login[:16] if customer.last_login else 'Never' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center space-x-2">
+                                    <!-- <button onclick="viewCustomer({{ customer.customer_id }})" 
+                                            class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-all hover:scale-105 border border-blue-200">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button onclick="editCustomer({{ customer.customer_id }})" 
+                                            class="bg-green-100 hover:bg-green-200 text-green-700 p-2 rounded-lg transition-all hover:scale-105 border border-green-200">
+                                        <i class="fas fa-edit"></i>
+                                    </button> -->
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-16">
+                    <i class="fas fa-users text-purple-400 text-6xl mb-4"></i>
+                    <h3 class="text-xl font-medium text-gray-900 mb-2">No customers found</h3>
+                    <p class="text-gray-500">Customers will appear here as they sign up</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', function() {
+    filterCustomers();
+});
+
+// Filter functionality
+document.getElementById('cityFilter').addEventListener('change', function() {
+    filterCustomers();
+});
+
+function filterCustomers() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const cityFilter = document.getElementById('cityFilter').value;
+    
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const customerName = row.querySelector('td:first-child .text-sm.font-medium').textContent.toLowerCase();
+        const customerEmail = row.querySelector('td:nth-child(2) .text-sm.text-gray-900').textContent.toLowerCase();
+        const city = row.dataset.city;
+        
+        const matchesSearch = customerName.includes(searchTerm) || customerEmail.includes(searchTerm);
+        const matchesCity = !cityFilter || city === cityFilter;
+        
+        if (matchesSearch && matchesCity) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function viewCustomer(customerId) {
+    // Add view customer functionality
+    alert(`View customer details for ID: ${customerId}`);
+}
+
+function editCustomer(customerId) {
+    // Add edit customer functionality
+    alert(`Edit customer for ID: ${customerId}`);
+}
+
+// Add these JavaScript functions to your admin templates
+
+// Generic export function
+function exportData(endpoint, filename) {
+    // Show loading state
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Exporting...';
+    button.disabled = true;
+    
+    // Create a temporary link to download the file
+    fetch(endpoint)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Export failed');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = filename || 'export.csv';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            // Show success message
+            showNotification('Export completed successfully!', 'success');
+        })
+        .catch(error => {
+            console.error('Export error:', error);
+            showNotification('Export failed. Please try again.', 'error');
+        })
+        .finally(() => {
+            // Restore button state
+            button.innerHTML = originalText;
+            button.disabled = false;
+        });
+}
+
+// Specific export functions
+function exportCustomers() {
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+    exportData('/api/admin/export-customers', `customers_${timestamp}.csv`);
+}
+
+function exportOrders() {
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+    exportData('/api/admin/export-orders', `orders_${timestamp}.csv`);
+}
+
+function exportProducts() {
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+    exportData('/api/admin/export-products', `products_${timestamp}.csv`);
+}
+
+function exportSegmentation() {
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+    exportData('/api/admin/export-segmentation', `segmentation_${timestamp}.csv`);
+}
+
+function exportChurnAnalysis() {
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+    exportData('/api/admin/export-churn-analysis', `churn_analysis_${timestamp}.csv`);
+}
+
+function exportActivityLogs() {
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+    exportData('/api/admin/export-activity-logs', `activity_logs_${timestamp}.csv`);
+}
+
+function downloadAnalyticsReport() {
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+    exportData('/api/admin/download-analytics-report', `analytics_report_${timestamp}.csv`);
+}
+
+// Notification function
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full`;
+    
+    // Set colors based on type
+    const colors = {
+        success: 'bg-green-500 text-white',
+        error: 'bg-red-500 text-white',
+        info: 'bg-blue-500 text-white',
+        warning: 'bg-yellow-500 text-black'
+    };
+    
+    notification.className += ` ${colors[type] || colors.info}`;
+    notification.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+</script>
+{% endblock %}
